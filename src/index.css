@@ -99,15 +99,332 @@
 
   /* High contrast theme for accessibility */
   .high-contrast {
+    /* Core backgrounds and foregrounds with maximum contrast */
     --background: 0 0% 100%;
     --foreground: 0 0% 0%;
-    --primary: 240 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 95%;
-    --secondary-foreground: 0 0% 0%;
-    --border: 0 0% 20%;
+    
+    /* Card system with stark contrast */
     --card: 0 0% 100%;
     --card-foreground: 0 0% 0%;
+    
+    /* Popover system */
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    
+    /* Primary colors with high contrast blue */
+    --primary: 240 100% 25%;
+    --primary-foreground: 0 0% 100%;
+    --primary-soft: 240 100% 85%;
+    
+    /* Secondary colors with strong contrast */
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-accent: 0 0% 90%;
+    
+    /* Tertiary colors */
+    --tertiary: 240 100% 30%;
+    --tertiary-foreground: 0 0% 100%;
+    
+    /* Success colors - high contrast green */
+    --success: 120 100% 25%;
+    --success-foreground: 0 0% 100%;
+    
+    /* Warning colors - high contrast amber */
+    --warning: 45 100% 35%;
+    --warning-foreground: 0 0% 100%;
+    
+    /* Destructive - high contrast red */
+    --destructive: 0 100% 35%;
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Muted elements with clear contrast */
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 20%;
+    
+    /* Accent elements */
+    --accent: 0 0% 95%;
+    --accent-foreground: 0 0% 0%;
+    
+    /* Interactive elements with strong borders */
+    --border: 0 0% 0%;
+    --input: 0 0% 100%;
+    --ring: 240 100% 25%;
+    
+    /* Enhanced focus ring for visibility */
+    --focus-ring: 240 100% 25%;
+    --shadow-focus: 0 0 0 4px hsl(240 100% 25% / 0.5);
+    
+    /* Sidebar styling for high contrast */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 0%;
+    --sidebar-primary: 0 0% 0%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 95%;
+    --sidebar-accent-foreground: 0 0% 0%;
+    --sidebar-border: 0 0% 0%;
+    --sidebar-ring: 240 100% 25%;
+  }
+  
+  /* Enhanced focus styles for high contrast mode */
+  .high-contrast *:focus-visible {
+    outline: 3px solid hsl(var(--focus-ring)) !important;
+    outline-offset: 2px !important;
+    box-shadow: var(--shadow-focus) !important;
+  }
+  
+  /* High contrast button enhancements */
+  .high-contrast .btn-primary,
+  .high-contrast button[class*="btn-primary"] {
+    border: 2px solid hsl(var(--foreground)) !important;
+    font-weight: 600 !important;
+  }
+  
+  .high-contrast .btn-secondary,
+  .high-contrast button[class*="btn-secondary"] {
+    border: 2px solid hsl(var(--foreground)) !important;
+    font-weight: 600 !important;
+  }
+  
+  /* High contrast card enhancements */
+  .high-contrast .card-soft,
+  .high-contrast [class*="card"] {
+    border: 2px solid hsl(var(--foreground)) !important;
+    box-shadow: none !important;
+  }
+  
+  /* High contrast input enhancements */
+  .high-contrast input,
+  .high-contrast textarea,
+  .high-contrast select {
+    border: 2px solid hsl(var(--foreground)) !important;
+    background: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
+  }
+  
+  /* High contrast text enhancements */
+  .high-contrast {
+    font-weight: 500 !important;
+  }
+  
+  .high-contrast h1,
+  .high-contrast h2,
+  .high-contrast h3,
+  .high-contrast h4,
+  .high-contrast h5,
+  .high-contrast h6 {
+    font-weight: 700 !important;
+    color: hsl(var(--foreground)) !important;
+  }
+  
+  /* High contrast navigation enhancements */
+  .high-contrast nav,
+  .high-contrast [role="navigation"] {
+    border: 2px solid hsl(var(--foreground)) !important;
+  }
+  
+  /* High contrast link enhancements */
+  .high-contrast a {
+    color: hsl(var(--primary)) !important;
+    text-decoration: underline !important;
+    font-weight: 600 !important;
+  }
+  
+  .high-contrast a:hover,
+  .high-contrast a:focus {
+    background-color: hsl(var(--primary)) !important;
+    color: hsl(var(--primary-foreground)) !important;
+    text-decoration: none !important;
+  }
+  
+  /* High contrast icon enhancements */
+  .high-contrast svg {
+    stroke-width: 2.5 !important;
+  }
+  
+  /* High contrast divider enhancements */
+  .high-contrast hr,
+  .high-contrast [role="separator"] {
+    border-color: hsl(var(--foreground)) !important;
+    border-width: 2px !important;
+  }
+  
+  /* Magnifier mode for low-vision users */
+  .magnifier-mode {
+    /* Subtle global zoom scaling */
+    zoom: 1.1;
+    
+    /* Gentle font sizing increase */
+    font-size: 105% !important;
+    line-height: 1.5 !important;
+    
+    /* Minimal spacing improvements */
+    letter-spacing: 0.01em !important;
+  }
+  
+  /* Magnifier text enhancements */
+  .magnifier-mode h1,
+  .magnifier-mode h2,
+  .magnifier-mode h3,
+  .magnifier-mode h4,
+  .magnifier-mode h5,
+  .magnifier-mode h6 {
+    font-size: 110% !important;
+    line-height: 1.4 !important;
+    margin-bottom: 0.75rem !important;
+  }
+  
+  /* Magnifier button and interactive element enhancements */
+  .magnifier-mode button,
+  .magnifier-mode input,
+  .magnifier-mode select,
+  .magnifier-mode textarea {
+    min-height: 46px !important;
+    padding: 0.6rem 0.8rem !important;
+    font-size: 102% !important;
+  }
+  
+  /* Exclude toggle switches from magnifier scaling */
+  .magnifier-mode button[role="switch"],
+  .magnifier-mode [data-state],
+  .magnifier-mode .switch-root,
+  .magnifier-mode .switch-thumb {
+    font-size: inherit !important;
+    padding: inherit !important;
+    min-height: inherit !important;
+    zoom: 0.91 !important; /* Counter the global zoom */
+  }
+  
+  /* Keep switch containers at normal size */
+  .magnifier-mode [role="switch"],
+  .magnifier-mode button[role="switch"] * {
+    transform: scale(0.91) !important; /* Counter the 1.1x zoom */
+    transform-origin: center !important;
+  }
+  
+  /* Specific targeting for Radix UI Switch components */
+  .magnifier-mode button[role="switch"] {
+    zoom: 0.91 !important; /* Counter the 1.1x global zoom */
+    font-size: inherit !important;
+    min-height: auto !important;
+    padding: 0 !important;
+  }
+  
+  /* Keep the switch thumb at normal size */
+  .magnifier-mode button[role="switch"] > span {
+    zoom: 1 !important;
+    transform: none !important;
+  }
+  
+  /* Ensure switch container doesn't get extra spacing */
+  .magnifier-mode .flex:has(button[role="switch"]) {
+    gap: inherit !important;
+  }
+  
+  /* Magnifier card and container enhancements */
+  .magnifier-mode .card-soft,
+  .magnifier-mode [class*="card"] {
+    padding: 1.5rem !important;
+    margin: 0.5rem !important;
+  }
+  
+  /* Magnifier navigation enhancements */
+  .magnifier-mode nav,
+  .magnifier-mode [role="navigation"] {
+    padding: 1.25rem !important;
+  }
+  
+  .magnifier-mode nav button,
+  .magnifier-mode [role="navigation"] button {
+    min-height: 48px !important;
+    font-size: 105% !important;
+    padding: 0.75rem 1.25rem !important;
+  }
+  
+  /* Magnifier link enhancements */
+  .magnifier-mode a {
+    font-size: 102% !important;
+    padding: 0.2rem 0.4rem !important;
+    text-decoration: underline !important;
+    text-underline-offset: 0.15em !important;
+  }
+  
+  /* Magnifier icon enhancements */
+  .magnifier-mode svg {
+    width: 1.2em !important;
+    height: 1.2em !important;
+  }
+  
+  /* Magnifier spacing enhancements - more conservative */
+  .magnifier-mode .space-y-1 > * + * {
+    margin-top: 0.3rem !important;
+  }
+  
+  .magnifier-mode .space-y-2 > * + * {
+    margin-top: 0.6rem !important;
+  }
+  
+  .magnifier-mode .space-y-3 > * + * {
+    margin-top: 0.8rem !important;
+  }
+  
+  .magnifier-mode .space-y-4 > * + * {
+    margin-top: 1rem !important;
+  }
+  
+  .magnifier-mode .space-y-6 > * + * {
+    margin-top: 1.5rem !important;
+  }
+  
+  /* Magnifier grid enhancements */
+  .magnifier-mode .grid {
+    gap: 1.25rem !important;
+  }
+  
+  /* Magnifier focus enhancements */
+  .magnifier-mode *:focus-visible {
+    outline: 3px solid hsl(var(--focus-ring)) !important;
+    outline-offset: 3px !important;
+    box-shadow: 0 0 0 6px hsl(var(--focus-ring) / 0.2) !important;
+  }
+  
+  /* Magnifier table enhancements */
+  .magnifier-mode table {
+    font-size: 102% !important;
+  }
+  
+  .magnifier-mode th,
+  .magnifier-mode td {
+    padding: 0.75rem !important;
+  }
+  
+  /* Magnifier form enhancements */
+  .magnifier-mode label {
+    font-size: 103% !important;
+    font-weight: 500 !important;
+    margin-bottom: 0.4rem !important;
+    display: block !important;
+  }
+  
+  /* Magnifier modal and dialog enhancements */
+  .magnifier-mode [role="dialog"],
+  .magnifier-mode .dialog-content {
+    padding: 1.75rem !important;
+  }
+  
+  /* Combined high contrast and magnifier mode */
+  .high-contrast.magnifier-mode {
+    zoom: 1.15 !important;
+    font-size: 108% !important;
+    font-weight: 500 !important;
+  }
+  
+  .high-contrast.magnifier-mode button,
+  .high-contrast.magnifier-mode input,
+  .high-contrast.magnifier-mode select,
+  .high-contrast.magnifier-mode textarea {
+    min-height: 48px !important;
+    border-width: 2px !important;
+    font-weight: 500 !important;
   }
 
   .dark {
