@@ -21,7 +21,7 @@ const Index = () => {
       case 'dashboard':
         return <Dashboard onModuleChange={setActiveModule} />;
       case 'workplace-assistant':
-        return <WorkplaceAssistant />;
+        return <WorkplaceAssistant onModuleChange={setActiveModule} />;
       case 'smart-navigation':
         return <SmartNavigation />;
       case 'communication-hub':
