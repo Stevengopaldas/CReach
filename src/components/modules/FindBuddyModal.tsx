@@ -27,9 +27,10 @@ interface Buddy {
 interface FindBuddyModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onRequestSent?: () => void;
 }
 
-const FindBuddyModal: React.FC<FindBuddyModalProps> = ({ isOpen, onClose }) => {
+const FindBuddyModal: React.FC<FindBuddyModalProps> = ({ isOpen, onClose, onRequestSent }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedExpertise, setSelectedExpertise] = useState('all');
   const [selectedAvailability, setSelectedAvailability] = useState('all');
@@ -220,8 +221,17 @@ const FindBuddyModal: React.FC<FindBuddyModalProps> = ({ isOpen, onClose }) => {
     try {
       setLoading(true);
       
+      // Generate mock requester ID for demo purposes
+      // In a real app, this would come from authenticated user session
+      const mockRequesterId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+
       // Prepare buddy request data for Supabase
       const requestData = {
+        requester_id: mockRequesterId,
         buddy_id: selectedBuddy.id,
         type: 'mentorship', // Default type, could be determined by buddy expertise
         description: requestMessage,
@@ -249,6 +259,11 @@ const FindBuddyModal: React.FC<FindBuddyModalProps> = ({ isOpen, onClose }) => {
       
       // Show success notification
       alert(`✅ Buddy request sent successfully to ${selectedBuddy.name}! You'll be notified when they respond.`);
+      
+      // Trigger refresh of recent requests
+      if (onRequestSent) {
+        onRequestSent();
+      }
       
     } catch (error) {
       console.error('Error sending buddy request:', error);

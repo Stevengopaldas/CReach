@@ -11,6 +11,7 @@ import { supabase } from '@/lib/supabase';
 interface EmotionalCheckinModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onCheckinComplete?: () => void;
 }
 
 interface MoodOption {
@@ -20,7 +21,7 @@ interface MoodOption {
   color: string;
 }
 
-const EmotionalCheckinModal: React.FC<EmotionalCheckinModalProps> = ({ isOpen, onClose }) => {
+const EmotionalCheckinModal: React.FC<EmotionalCheckinModalProps> = ({ isOpen, onClose, onCheckinComplete }) => {
   const [step, setStep] = useState(1);
   const [moodScore, setMoodScore] = useState([7]);
   const [stressLevel, setStressLevel] = useState([5]);
@@ -46,23 +47,35 @@ const EmotionalCheckinModal: React.FC<EmotionalCheckinModalProps> = ({ isOpen, o
     try {
       setLoading(true);
 
+      // Generate mock user ID for demo purposes
+      // In a real app, this would come from authenticated user session
+      const mockUserId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+
       const checkinData = {
+        user_id: mockUserId,
         mood_score: moodScore[0],
         stress_level: stressLevel[0],
-        energy_level: energyLevel[0],
-        selected_mood: selectedMood,
         notes: notes.trim() || null
       };
 
       console.log('Submitting emotional check-in:', checkinData);
 
-      // In real implementation, this would save to Supabase
-      // const { error } = await supabase
-      //   .from('emotional_checkins')
-      //   .insert([checkinData]);
+      // Save to Supabase emotional_checkins table
+      const { data, error } = await supabase
+        .from('emotional_checkins')
+        .insert([checkinData])
+        .select();
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (error) {
+        console.error('Detailed check-in error:', error);
+        throw error;
+      }
+
+      console.log('Check-in saved successfully:', data);
 
       onClose();
       setStep(1);
@@ -75,9 +88,25 @@ const EmotionalCheckinModal: React.FC<EmotionalCheckinModalProps> = ({ isOpen, o
       // Show success message
       alert('Thank you for sharing! Your check-in has been recorded confidentially.');
 
+      // Trigger activity refresh
+      if (onCheckinComplete) {
+        onCheckinComplete();
+      }
+
     } catch (error) {
       console.error('Error submitting check-in:', error);
-      alert('Failed to submit check-in. Please try again.');
+      
+      // Handle Supabase errors properly
+      let errorMessage = 'Failed to submit check-in';
+      if (error && typeof error === 'object') {
+        if ('message' in error) {
+          errorMessage += `: ${String(error.message)}`;
+        } else if ('error' in error) {
+          errorMessage += `: ${String(error.error)}`;
+        }
+      }
+      
+      alert(`${errorMessage}. Please try again.`);
     } finally {
       setLoading(false);
     }

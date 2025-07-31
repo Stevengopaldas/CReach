@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, MessageCircle, Heart, Users, Clock, Star, Send, HelpCircle, UserPlus, HeadphonesIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +8,21 @@ import FindBuddyModal from './FindBuddyModal';
 import EmotionalCheckinModal from './EmotionalCheckinModal';
 import CalendarModal from './CalendarModal';
 import AIChatbotModal from './AIChatbotModal';
+import RequestHelpModal from './RequestHelpModal';
+import MyRequestsModal from './MyRequestsModal';
+import { supabase } from '@/lib/supabase';
 import BuddyRegistrationModal from './BuddyRegistrationModal';
+
+interface BuddyRequest {
+  id: string;
+  requester_id: string;
+  buddy_id: string;
+  type: string;
+  description: string;
+  status: 'pending' | 'matched' | 'completed' | 'cancelled';
+  created_at: string;
+  buddy_name?: string;
+}
 
 const BuddyAssist: React.FC = () => {
   const [activeTab, setActiveTab] = useState('peer-support');
@@ -18,6 +32,56 @@ const BuddyAssist: React.FC = () => {
   const [calendarMode, setCalendarMode] = useState<'view' | 'schedule'>('view');
   const [showChatbotModal, setShowChatbotModal] = useState(false);
   const [showBuddyRegistrationModal, setShowBuddyRegistrationModal] = useState(false);
+  const [showRequestHelpModal, setShowRequestHelpModal] = useState(false);
+  const [showMyRequestsModal, setShowMyRequestsModal] = useState(false);
+  const [recentRequests, setRecentRequests] = useState<BuddyRequest[]>([]);
+  const [loadingRequests, setLoadingRequests] = useState(false);
+
+  // Fetch recent buddy requests from database
+  const fetchRecentRequests = async () => {
+    try {
+      setLoadingRequests(true);
+      
+      // Fetch buddy requests with buddy names
+      const { data: requests, error } = await supabase
+        .from('buddy_requests')
+        .select(`
+          id,
+          requester_id,
+          buddy_id,
+          type,
+          description,
+          status,
+          created_at,
+          users!buddy_requests_buddy_id_fkey(name)
+        `)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (error) {
+        console.error('Error fetching buddy requests:', error);
+        return;
+      }
+
+      // Transform data to include buddy names
+      const requestsWithNames = requests?.map(request => ({
+        ...request,
+        buddy_name: (request.users as any)?.name || 'Unknown'
+      })) || [];
+
+      setRecentRequests(requestsWithNames);
+      
+    } catch (error) {
+      console.error('Error fetching recent requests:', error);
+    } finally {
+      setLoadingRequests(false);
+    }
+  };
+
+  // Fetch requests on component mount
+  useEffect(() => {
+    fetchRecentRequests();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -52,27 +116,25 @@ const BuddyAssist: React.FC = () => {
 
       {/* Main Navigation Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-8">
+        <TabsList className="grid w-full grid-cols-2 mb-8">
           <TabsTrigger value="peer-support" className="flex items-center gap-2">
-            <Heart className="h-4 w-4" />
-            <span className="hidden sm:inline">Peer Support</span>
-            <span className="sm:hidden">Support</span>
+            <Users className="w-4 h-4" />
+            Peer Support
           </TabsTrigger>
           <TabsTrigger value="volunteer-help" className="flex items-center gap-2">
-            <UserPlus className="h-4 w-4" />
-            <span className="hidden sm:inline">Volunteer Help</span>
-            <span className="sm:hidden">Help</span>
+            <Heart className="w-4 h-4" />
+            Volunteer Help
           </TabsTrigger>
         </TabsList>
 
         {/* Peer Support Tab Content */}
         <TabsContent value="peer-support" className="space-y-6">
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-semibold text-foreground mb-2">Peer Support & Mentorship</h2>
-            <p className="text-muted-foreground">Find mentors, buddies, and emotional support</p>
+            <h2 className="text-2xl font-semibold text-foreground mb-2">Peer Support System</h2>
+            <p className="text-muted-foreground">Find mentors, share experiences, and grow together</p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {/* Find a Buddy Card */}
             <Card className="card-soft hover:shadow-soft transition-all duration-200">
               <CardHeader>
@@ -82,33 +144,25 @@ const BuddyAssist: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground mb-4">Get matched with mentors and peers based on your needs</p>
-                <Button 
-                  className="w-full btn-primary"
-                  onClick={() => setShowFindBuddyModal(true)}
-                >
-                  Start Matching
+                <p className="text-muted-foreground mb-4">Connect with mentors and peers for guidance and support</p>
+                <Button className="w-full" onClick={() => setShowFindBuddyModal(true)}>
+                  Browse Buddies
                 </Button>
               </CardContent>
             </Card>
 
             {/* Be a Buddy Card */}
-            <Card className="card-soft hover:shadow-soft transition-all duration-200 border-2 border-dashed border-secondary/30 hover:border-secondary/50">
+            <Card className="card-soft hover:shadow-soft transition-all duration-200">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Heart className="h-5 w-5 text-secondary" />
+                  <UserPlus className="h-5 w-5 text-secondary" />
                   Be a Buddy
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground mb-4">Share your expertise and help colleagues in their accessibility journey</p>
-                <Button 
-                  variant="outline" 
-                  className="w-full border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground"
-                  onClick={() => setShowBuddyRegistrationModal(true)}
-                >
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Become a Buddy
+                <p className="text-muted-foreground mb-4">Join our buddy network and help others in their journey</p>
+                <Button variant="outline" className="w-full" onClick={() => setShowBuddyRegistrationModal(true)}>
+                  Register as Buddy
                 </Button>
               </CardContent>
             </Card>
@@ -154,31 +208,85 @@ const BuddyAssist: React.FC = () => {
           {/* Recent Activity */}
           <Card className="card-soft">
             <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
+              <CardTitle className="flex items-center justify-between">
+                Recent Activity
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={fetchRecentRequests}
+                  disabled={loadingRequests}
+                >
+                  {loadingRequests ? 'Loading...' : 'Refresh'}
+                </Button>
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-accent/20">
-                  <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
-                    <Users className="h-4 w-4 text-primary" />
+                {loadingRequests ? (
+                  <div className="text-center py-4">
+                    <p className="text-muted-foreground">Loading recent requests...</p>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">New buddy match available</p>
-                    <p className="text-xs text-muted-foreground">Sarah Chen - Visual Accessibility Expert</p>
+                ) : recentRequests.length === 0 ? (
+                  <div className="text-center py-4">
+                    <p className="text-muted-foreground">No recent buddy requests</p>
+                    <p className="text-xs text-muted-foreground mt-1">Requests will appear here when you send buddy requests</p>
                   </div>
-                  <Badge variant="secondary">New</Badge>
-                </div>
-                
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-accent/20">
-                  <div className="w-8 h-8 bg-success/20 rounded-full flex items-center justify-center">
-                    <Calendar className="h-4 w-4 text-success" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Upcoming meeting reminder</p>
-                    <p className="text-xs text-muted-foreground">Tomorrow at 2:00 PM with Marcus Johnson</p>
-                  </div>
-                  <Badge variant="outline">Tomorrow</Badge>
-                </div>
+                ) : (
+                  recentRequests.map((request) => {
+                    const getStatusColor = (status: string) => {
+                      switch (status) {
+                        case 'pending': return 'bg-warning/20';
+                        case 'matched': return 'bg-success/20';
+                        case 'completed': return 'bg-primary/20';
+                        case 'cancelled': return 'bg-destructive/20';
+                        default: return 'bg-accent/20';
+                      }
+                    };
+
+                    const getStatusBadge = (status: string) => {
+                      switch (status) {
+                        case 'pending': return <Badge variant="secondary">Pending</Badge>;
+                        case 'matched': return <Badge variant="default">Matched</Badge>;
+                        case 'completed': return <Badge variant="outline">Completed</Badge>;
+                        case 'cancelled': return <Badge variant="destructive">Cancelled</Badge>;
+                        default: return <Badge variant="secondary">{status}</Badge>;
+                      }
+                    };
+
+                    const formatDate = (dateString: string) => {
+                      const date = new Date(dateString);
+                      const now = new Date();
+                      const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+                      
+                      if (diffInHours < 1) return 'Just now';
+                      if (diffInHours < 24) return `${diffInHours}h ago`;
+                      const diffInDays = Math.floor(diffInHours / 24);
+                      return `${diffInDays}d ago`;
+                    };
+
+                    return (
+                      <div key={request.id} className={`flex items-center gap-3 p-3 rounded-lg ${getStatusColor(request.status)}`}>
+                        <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+                          <MessageCircle className="h-4 w-4 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">
+                            Buddy request sent to {request.buddy_name}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {request.description.length > 50 
+                              ? `${request.description.substring(0, 50)}...` 
+                              : request.description}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {formatDate(request.created_at)}
+                          </p>
+                        </div>
+                        {getStatusBadge(request.status)}
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </CardContent>
           </Card>
@@ -188,38 +296,22 @@ const BuddyAssist: React.FC = () => {
         <TabsContent value="volunteer-help" className="space-y-6">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-semibold text-foreground mb-2">Volunteer Help Booking</h2>
-            <p className="text-muted-foreground">Request assistance from our volunteer community</p>
+            <p className="text-muted-foreground">Request assistance from our dedicated volunteers</p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {/* Request Help Card */}
             <Card className="card-soft hover:shadow-soft transition-all duration-200">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <HelpCircle className="h-5 w-5 text-primary" />
+                  <Send className="h-5 w-5 text-primary" />
                   Request Help
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground mb-4">Submit a request for assistance from volunteers</p>
-                <Button className="w-full btn-primary">
+                <p className="text-muted-foreground mb-4">Submit a request for volunteer assistance</p>
+                <Button className="w-full" onClick={() => setShowRequestHelpModal(true)}>
                   Create Request
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Volunteer Dashboard Card */}
-            <Card className="card-soft hover:shadow-soft transition-all duration-200">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <UserPlus className="h-5 w-5 text-secondary" />
-                  Volunteer Dashboard
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-4">View and respond to help requests</p>
-                <Button variant="outline" className="w-full">
-                  Open Dashboard
                 </Button>
               </CardContent>
             </Card>
@@ -234,73 +326,37 @@ const BuddyAssist: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">Track your submitted help requests</p>
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full" onClick={() => setShowMyRequestsModal(true)}>
                   View Status
                 </Button>
               </CardContent>
             </Card>
           </div>
-
-          {/* Quick Help Categories */}
-          <Card className="card-soft">
-            <CardHeader>
-              <CardTitle>Quick Help Categories</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
-                  <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
-                    <HelpCircle className="h-4 w-4 text-primary" />
-                  </div>
-                  <span className="text-sm">Elevator Help</span>
-                </Button>
-                
-                <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
-                  <div className="w-8 h-8 bg-secondary/20 rounded-full flex items-center justify-center">
-                    <Users className="h-4 w-4 text-secondary" />
-                  </div>
-                  <span className="text-sm">Moving Items</span>
-                </Button>
-                
-                <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
-                  <div className="w-8 h-8 bg-tertiary/20 rounded-full flex items-center justify-center">
-                    <MessageCircle className="h-4 w-4 text-tertiary" />
-                  </div>
-                  <span className="text-sm">Guidance</span>
-                </Button>
-                
-                <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
-                  <div className="w-8 h-8 bg-success/20 rounded-full flex items-center justify-center">
-                    <Star className="h-4 w-4 text-success" />
-                  </div>
-                  <span className="text-sm">Other Help</span>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
       </Tabs>
 
-      {/* AI Chatbot Floating Button */}
+      {/* Floating AI Chatbot Button */}
       <div className="fixed bottom-6 right-6 z-50">
-        <Button 
-          size="lg" 
-          className="w-14 h-14 rounded-full bg-gradient-primary shadow-soft hover:shadow-focus transition-all duration-300"
-          aria-label="Open AI Assistant"
+        <Button
+          size="lg"
+          className="rounded-full w-14 h-14 shadow-lg bg-gradient-primary hover:bg-gradient-primary/90"
           onClick={() => setShowChatbotModal(true)}
         >
           <HeadphonesIcon className="h-6 w-6 text-white" />
         </Button>
       </div>
 
+      {/* Modals */}
       <FindBuddyModal 
         isOpen={showFindBuddyModal} 
         onClose={() => setShowFindBuddyModal(false)} 
+        onRequestSent={fetchRecentRequests}
       />
 
       <EmotionalCheckinModal 
         isOpen={showCheckinModal} 
         onClose={() => setShowCheckinModal(false)} 
+        onCheckinComplete={fetchRecentRequests}
       />
 
       <CalendarModal 
@@ -318,8 +374,19 @@ const BuddyAssist: React.FC = () => {
         isOpen={showBuddyRegistrationModal} 
         onClose={() => setShowBuddyRegistrationModal(false)} 
       />
+
+      <RequestHelpModal 
+        isOpen={showRequestHelpModal} 
+        onClose={() => setShowRequestHelpModal(false)} 
+        onRequestSubmitted={fetchRecentRequests}
+      />
+
+      <MyRequestsModal 
+        isOpen={showMyRequestsModal} 
+        onClose={() => setShowMyRequestsModal(false)} 
+      />
     </div>
   );
 };
 
-export default BuddyAssist;
+export default BuddyAssist; 

@@ -118,34 +118,72 @@ const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose, mode = '
     }
   ];
 
-  const availableBuddies = [
-    { id: '1', name: 'Sarah Chen', expertise: 'Visual Accessibility' },
-    { id: '2', name: 'Marcus Johnson', expertise: 'Mobility Support' },
-    { id: '3', name: 'Emily Rodriguez', expertise: 'Cognitive Support' },
-    { id: '4', name: 'David Kim', expertise: 'Hearing Assistance' },
-    { id: '5', name: 'Dr. Aisha Patel', expertise: 'Mental Health' }
-  ];
+  const [availableBuddies, setAvailableBuddies] = useState<Array<{id: string, name: string, expertise: string[]}>>([]);
+
+  // Fetch available buddies from database
+  const loadBuddies = async () => {
+    try {
+      const { data: buddies, error } = await supabase
+        .from('users')
+        .select('id, name, expertise')
+        .eq('role', 'buddy')
+        .eq('profile_completed', true);
+
+      if (error) {
+        console.error('Error fetching buddies:', error);
+        return;
+      }
+
+      // Format buddies for dropdown
+      const formattedBuddies = buddies?.map(buddy => ({
+        id: buddy.id,
+        name: buddy.name,
+        expertise: Array.isArray(buddy.expertise) ? buddy.expertise : []
+      })) || [];
+
+      setAvailableBuddies(formattedBuddies);
+    } catch (error) {
+      console.error('Error loading buddies:', error);
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
       loadMeetings();
+      loadBuddies();
     }
   }, [isOpen]);
 
   const loadMeetings = async () => {
     setLoading(true);
     try {
-      // In real implementation, fetch from Supabase
-      // const { data, error } = await supabase
-      //   .from('buddy_meetings')
-      //   .select('*')
-      //   .order('date', { ascending: true });
+      // Fetch meetings from Supabase with buddy names
+      const { data: meetingsData, error } = await supabase
+        .from('buddy_meetings')
+        .select(`
+          *,
+          users!buddy_meetings_buddy_id_fkey(name)
+        `)
+        .order('date', { ascending: true });
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
-      setMeetings(mockMeetings);
+      if (error) {
+        console.error('Error fetching meetings:', error);
+        // Fallback to mock data on error
+        setMeetings(mockMeetings);
+        return;
+      }
+
+      // Transform data to include buddy names
+      const formattedMeetings = meetingsData?.map(meeting => ({
+        ...meeting,
+        buddy_name: (meeting.users as any)?.name || 'Unknown Buddy'
+      })) || [];
+
+      setMeetings(formattedMeetings);
     } catch (error) {
       console.error('Error loading meetings:', error);
+      // Fallback to mock data on error
+      setMeetings(mockMeetings);
     } finally {
       setLoading(false);
     }
@@ -155,26 +193,47 @@ const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose, mode = '
     try {
       setLoading(true);
 
+      // Generate mock requester ID for demo purposes
+      const mockRequesterId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+
       const meetingData = {
-        ...formData,
-        buddy_name: availableBuddies.find(b => b.id === formData.buddy_id)?.name || '',
-        status: 'scheduled',
-        id: Date.now().toString(),
-        created_at: new Date().toISOString()
+        requester_id: mockRequesterId,
+        buddy_id: formData.buddy_id,
+        title: formData.title,
+        date: formData.date,
+        time: formData.time,
+        duration: formData.duration,
+        type: formData.type,
+        location: formData.location,
+        meeting_type: formData.meeting_type,
+        notes: formData.notes,
+        status: 'scheduled'
       };
 
       console.log('Scheduling meeting:', meetingData);
 
-      // In real implementation, save to Supabase
-      // const { error } = await supabase
-      //   .from('buddy_meetings')
-      //   .insert([meetingData]);
+      // Save to Supabase
+      const { data, error } = await supabase
+        .from('buddy_meetings')
+        .insert([meetingData])
+        .select(`
+          *,
+          users!buddy_meetings_buddy_id_fkey(name)
+        `);
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (error) {
+        console.error('Error scheduling meeting:', error);
+        throw error;
+      }
 
-      // Add to local state
-      setMeetings(prev => [...prev, meetingData as Meeting]);
+      console.log('Meeting scheduled successfully:', data);
+
+      // Refresh meetings list
+      await loadMeetings();
       
       // Reset form
       setFormData({
@@ -196,7 +255,16 @@ const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose, mode = '
 
     } catch (error) {
       console.error('Error scheduling meeting:', error);
-      alert('Failed to schedule meeting. Please try again.');
+      
+      // Handle Supabase errors properly
+      let errorMessage = 'Failed to schedule meeting';
+      if (error && typeof error === 'object') {
+        if ('message' in error) {
+          errorMessage += `: ${String(error.message)}`;
+        }
+      }
+      
+      alert(`${errorMessage}. Please try again.`);
     } finally {
       setLoading(false);
     }
