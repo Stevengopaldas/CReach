@@ -1,10 +1,14 @@
 import { createClient } from '@supabase/supabase-js'
 
 // These will be your Supabase project credentials
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+// Using fallback values for development when env vars are not set
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co'
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-key'
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Only create the client if we have real credentials
+export const supabase = supabaseUrl.includes('placeholder') || supabaseAnonKey.includes('placeholder') 
+  ? null 
+  : createClient(supabaseUrl, supabaseAnonKey)
 
 // Database Types for TypeScript
 export interface User {
