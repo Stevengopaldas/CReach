@@ -12,12 +12,12 @@ const Navigation: React.FC<NavigationProps> = ({ activeModule, onModuleChange })
 
   const modules = [
     { id: 'dashboard', name: 'Dashboard', icon: Home, color: 'primary' },
+    { id: 'buddy-assist', name: 'Buddy Assist', icon: HelpCircle, color: 'primary' },
     { id: 'workplace-assistant', name: 'Workplace Assistant', icon: Briefcase, color: 'primary' },
     { id: 'smart-navigation', name: 'Smart Navigation', icon: MapPin, color: 'secondary' },
     { id: 'communication-hub', name: 'Communication Hub', icon: MessageCircle, color: 'tertiary' },
     { id: 'focus-comfort', name: 'Focus & Comfort', icon: Heart, color: 'success' },
     { id: 'ergonomic-coach', name: 'Ergonomic Coach', icon: Users, color: 'warning' },
-    { id: 'buddy-assist', name: 'Buddy Assist', icon: HelpCircle, color: 'primary' },
     { id: 'career-tracker', name: 'Career Tracker', icon: Star, color: 'secondary' },
     { id: 'feedback-app', name: 'Feedback App', icon: MessageSquare, color: 'tertiary' },
     { id: 'social-circle', name: 'Social Circle', icon: Users, color: 'success' },
