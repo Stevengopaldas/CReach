@@ -1,73 +1,105 @@
-# Welcome to your Lovable project
+# CReach — Accessibility Suite
 
-## Project info
+A modular accessibility and productivity suite that empowers inclusive workspaces. CReach ships with multiple focused modules (navigation aids, translation, communication hubs, ergonomic guidance, and more) behind a simple dashboard.
 
-**URL**: https://lovable.dev/projects/a8c6a1a4-cb1c-4078-bde0-12da645006eb
+---
 
-## How can I edit this code?
+## Highlights
 
-There are several ways of editing your application.
+- Accessible, responsive UI built with shadcn/ui + Tailwind
+- Central dashboard to switch modules
+- Rich module set (examples):
+  - Workplace Assistant
+  - Smart Navigation
+  - Communication Hub
+  - Focus Comfort
+  - Buddy Assist (with buddy registration/find buddy flows)
+  - Social Circle
+  - Ergonomic Coach
+  - Career Tracker
+  - Feedback App
+  - Translator
+  - Request/My Requests
+  - Calendar & Emotional Check-in modals
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/a8c6a1a4-cb1c-4078-bde0-12da645006eb) and start prompting.
+## Tech Stack
 
-Changes made via Lovable will be committed automatically to this repo.
+- React 18 + TypeScript
+- Vite
+- Tailwind CSS + shadcn/ui
+- lucide-react icons
+- React Router
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Development
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+Port: `5174` (configured in `vite.config.ts`)
 
-Follow these steps:
+From repository root (recommended):
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+```bash
+# install once at the repo root
+npm install
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# start CReach only
+npm run dev:creach
+# → http://localhost:5174
 
-# Step 3: Install the necessary dependencies.
-npm i
+# or start all apps for demo
+npm run dev:all
+```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+Run directly from this folder:
+
+```bash
+cd creach
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Build and preview this app only:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+npm run build
+npm run preview
+```
 
-**Use GitHub Codespaces**
+---
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Project Structure
 
-## What technologies are used for this project?
+```
+creach/
+├─ src/
+│  ├─ components/
+│  │  ├─ Navigation.tsx          # Left navigation for modules
+│  │  ├─ Dashboard.tsx           # Entry dashboard
+│  │  ├─ Chatbot.tsx
+│  │  └─ modules/                # Feature modules
+│  │     ├─ WorkplaceAssistant.tsx
+│  │     ├─ SmartNavigation.tsx
+│  │     ├─ CommunicationHub.tsx
+│  │     ├─ FocusComfort.tsx
+│  │     ├─ BuddyAssist.tsx
+│  │     ├─ SocialCircle.tsx
+│  │     ├─ ErgonomicCoach.tsx
+│  │     ├─ CareerTracker.tsx
+│  │     ├─ FeedbackApp.tsx
+│  │     ├─ Translator.tsx
+│  │     ├─ RequestHelpModal.tsx / MyRequestsModal.tsx
+│  │     ├─ BuddyRegistrationModal.tsx / FindBuddyModal.tsx
+│  │     └─ CalendarModal.tsx / EmotionalCheckinModal.tsx
+│  ├─ pages/Index.tsx            # Module switcher entry
+│  └─ main.tsx / App.tsx
+└─ vite.config.ts                # Port 5174
+```
 
-This project is built with:
+---
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Notes
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/a8c6a1a4-cb1c-4078-bde0-12da645006eb) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- This app is independent; it can be deployed on its own or used via the CP9 landing page.
+- Accessibility (keyboard nav, focus states) is a design priority across components.
